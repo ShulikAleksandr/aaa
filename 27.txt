@@ -1,0 +1,40 @@
+﻿Настройка DNS
+! включить разрешение имен
+ip domain-lookup
+! включаем внутренний DNS сервер
+ip dns server
+! прописываем DNS провайдера
+ip name-server XXX.XXX.XXX.XXX
+Настройка DHCP сервера
+! исключаем некоторые адреса из пула
+ip dhcp excluded-address 192.168.???.1 192.168.???.99
+! и настраиваем пул адресов
+ip dhcp pool LAN
+   network 192.168.1.0 255.255.255.0
+   default-router 192.168.1.1
+   dns-server 192.168.1.1
+шлюз по умолчанию
+ip route 0.0.0.0 0.0.0.0 XXX.XXX.XXX.XXX
+или так
+ip route 0.0.0.0 0.0.0.0 Serial0/0/0
+Настройка интерфейса
+Gw0(config) #interface Gi 0/0
+Gw0(config-if)#ip address 192.168.0.1 255.255.255.0
+Gw0(config-if)#description LAN
+Gw0(config-if)#no shutdown
+Gw0(config-if)#exit
+// сохранение конфигурации
+Gw0# copy running-config startup config  
+Настройка NAT (скорее всего он тебе не нужен)
+! на Интернет интерфейсе
+interface FastEthernet0/0
+ ip nat outside
+! на локальном интерфейсе
+interface Vlan1
+ ip nat inside
+! создаем список IP имеющих доступ к NAT
+ip access-list extended NAT
+ permit ip host 192.168.???.??? any
+! включаем NAT на внешнем интерфейсе
+ip nat inside source list NAT interface FastEthernet0/0 overload
+
